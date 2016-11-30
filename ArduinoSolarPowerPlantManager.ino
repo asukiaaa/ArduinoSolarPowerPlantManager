@@ -3,7 +3,7 @@
 
 #define LED_PIN 10
 
-TracerSolarChargeController chargeController(&Serial1);
+TracerSolarChargeController chargeCon(&Serial1);
 SakuraIO_I2C sakuraio;
 
 int   sumCount            = 0;
@@ -16,7 +16,7 @@ void setup() {
   Serial.begin(115200);
   Serial.println("setup");
   pinMode(LED_PIN, OUTPUT);
-  chargeController.begin();
+  chargeCon.begin();
   //for(;;){
   //  if( (sakuraio.getConnectionStatus() & 0x80) == 0x80 ) break;
   //  Serial.print(".");
@@ -29,11 +29,11 @@ void loop() {
   digitalWrite(LED_PIN, HIGH);
   Serial.println("start a loop");
 
-  if (chargeController.update()) {
-    chargeController.printInfo(&Serial);
-    sumPanelVolt   += chargeController.panelVolt;
-    sumBatteryVolt += chargeController.batteryVolt;
-    sumChargeAmp   += chargeController.chargeAmp;
+  if (chargeCon.update()) {
+    chargeCon.printInfo(&Serial);
+    sumPanelVolt   += chargeCon.panelVolt;
+    sumBatteryVolt += chargeCon.batteryVolt;
+    sumChargeAmp   += chargeCon.chargeAmp;
     sumCount ++;
   }
   //sumPanelVolt += 30;
@@ -48,7 +48,10 @@ void loop() {
     float chargeAmp   = sumChargeAmp / sumCount;
     float chargeWatt  = batteryVolt * chargeAmp;
 
-    sakuraioSendSolarPowerInfo(panelVolt, batteryVolt, chargeAmp, chargeWatt);
+    sakuraioSendSolarPowerInfo(panelVolt,
+                               batteryVolt,
+                               chargeAmp,
+                               chargeWatt);
 
     sumPanelVolt   = 0;
     sumBatteryVolt = 0;
