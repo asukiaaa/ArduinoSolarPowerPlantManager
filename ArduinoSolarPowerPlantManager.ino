@@ -2,6 +2,11 @@
 #include <SakuraIO.h>
 
 #define LED_PIN 10
+#define PANEL_AND_HEATER_PIN 4
+#define PANEL_AND_BATTERY_PIN 5
+
+static float HEATER_ON_VOLT = 25;
+static float BATTERY_OFF_VOLT = 25.5;
 
 TracerSolarChargeController chargeCon(&Serial1);
 SakuraIO_I2C sakuraio;
@@ -16,12 +21,11 @@ void setup() {
   Serial.begin(115200);
   Serial.println("setup");
   pinMode(LED_PIN, OUTPUT);
+  pinMode(PANEL_AND_HEATER_PIN, OUTPUT);
+  pinMode(PANEL_AND_BATTERY_PIN, OUTPUT);
+  panelAndHeater(false);
+  panelAndBattery(true);
   chargeCon.begin();
-  //for(;;){
-  //  if( (sakuraio.getConnectionStatus() & 0x80) == 0x80 ) break;
-  //  Serial.print(".");
-  //  delay(1000);
-  //}
   Serial.println("finished setup");
 }
 
@@ -35,6 +39,19 @@ void loop() {
     sumBatteryVolt += chargeCon.batteryVolt;
     sumChargeAmp   += chargeCon.chargeAmp;
     sumCount ++;
+
+    if (chargeCon.batteryVolt > HEATER_ON_VOLT) {
+      Serial.println("heater on");
+      panelAndHeater(true);
+    } else {
+      Serial.println("heater off");
+      panelAndHeater(false);
+    }
+    if (chargeCon.batteryVolt > BATTERY_OFF_VOLT) {
+      panelAndBattery(false);
+    } else {
+      panelAndBattery(true);
+    }
   }
   //sumPanelVolt += 30;
   //sumBatteryVolt += 22;
@@ -71,5 +88,23 @@ void sakuraioSendSolarPowerInfo(float panelVolt,
   sakuraio.enqueueTx((uint8_t)2, (float) batteryVolt);
   sakuraio.enqueueTx((uint8_t)3, (float) chargeWatt);
   sakuraio.send();
+}
+
+void panelAndHeater(bool connect) {
+  // Normaly open
+  if (connect) {
+    digitalWrite(PANEL_AND_HEATER_PIN, HIGH);
+  } else {
+    digitalWrite(PANEL_AND_HEATER_PIN, LOW);
+  }
+}
+
+void panelAndBattery(bool connect) {
+  // Normaly close
+  if (connect) {
+    digitalWrite(PANEL_AND_BATTERY_PIN, LOW);
+  } else {
+    digitalWrite(PANEL_AND_BATTERY_PIN, HIGH);
+  }
 }
 
