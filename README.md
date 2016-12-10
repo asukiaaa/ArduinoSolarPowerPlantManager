@@ -1,5 +1,5 @@
-# SakuraIoTArduinoSolarPowerMonitor
-An arduino project to monitor solar power with using sakura IoT platform.
+# ArduinoSolarPowerPlantManager
+An arduino project to manage solar power plant.
 
 # Retuirements
 The follosing libraries is needed to run this project.
