@@ -5,7 +5,8 @@
 #define PANEL_AND_HEATER_PIN 4
 #define PANEL_AND_BATTERY_PIN 5
 
-static float HEATER_ON_VOLT = 25;
+static float HEATER_ON_VOLT = 24.8;
+static float HEATER_OFF_VOLT = 24.3;
 static float BATTERY_OFF_VOLT = 25.5;
 
 TracerSolarChargeController chargeCon(&Serial1);
@@ -40,10 +41,10 @@ void loop() {
     sumChargeAmp   += chargeCon.chargeAmp;
     sumCount ++;
 
-    if (chargeCon.batteryVolt > HEATER_ON_VOLT) {
+    if (chargeCon.batteryVolt >= HEATER_ON_VOLT) {
       Serial.println("heater on");
       panelAndHeater(true);
-    } else {
+    } else if (chargeCon.batteryVolt <= HEATER_OFF_VOLT) {
       Serial.println("heater off");
       panelAndHeater(false);
     }
