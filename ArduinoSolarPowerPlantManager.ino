@@ -40,19 +40,6 @@ void loop() {
     sumBatteryVolt += chargeCon.batteryVolt;
     sumChargeAmp   += chargeCon.chargeAmp;
     sumCount ++;
-
-    if (chargeCon.batteryVolt >= HEATER_ON_VOLT) {
-      Serial.println("heater on");
-      panelAndHeater(true);
-    } else if (chargeCon.batteryVolt <= HEATER_OFF_VOLT) {
-      Serial.println("heater off");
-      panelAndHeater(false);
-    }
-    if (chargeCon.batteryVolt > BATTERY_OFF_VOLT) {
-      panelAndBattery(false);
-    } else {
-      panelAndBattery(true);
-    }
   }
   //sumPanelVolt += 30;
   //sumBatteryVolt += 22;
@@ -66,6 +53,8 @@ void loop() {
     float chargeAmp   = sumChargeAmp / sumCount;
     float chargeWatt  = batteryVolt * chargeAmp;
 
+    updateRelays(batteryVolt);
+
     sakuraioSendSolarPowerInfo(panelVolt,
                                batteryVolt,
                                chargeAmp,
@@ -78,6 +67,21 @@ void loop() {
   }
 
   delay(10000);
+}
+
+void updateRelays(float batteryVolt) {
+  if (batteryVolt >= HEATER_ON_VOLT) {
+    Serial.println("heater on");
+    panelAndHeater(true);
+  } else if (batteryVolt <= HEATER_OFF_VOLT) {
+    Serial.println("heater off");
+    panelAndHeater(false);
+  }
+  if (batteryVolt > BATTERY_OFF_VOLT) {
+    panelAndBattery(false);
+  } else {
+    panelAndBattery(true);
+  }
 }
 
 void sakuraioSendSolarPowerInfo(float panelVolt,
